@@ -2,10 +2,8 @@ package main
 
 import (
 	"database/sql"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -15,23 +13,6 @@ func main() {
 	cfg, err := loadConfig("config.json")
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	// sort logfile out
-	switch cfg.LogFile {
-	case "":
-		log.SetOutput(ioutil.Discard)
-	case "stdout":
-		log.SetOutput(os.Stdout)
-	case "stderr":
-		log.SetOutput(os.Stderr)
-	default:
-		f, err := os.OpenFile(cfg.LogFile, os.O_CREATE|os.O_APPEND, 0644)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		defer f.Close()
-		log.SetOutput(f)
 	}
 
 	// open database and test connection

@@ -9,7 +9,6 @@ import (
 type config struct {
 	CertFile string `json:"certFile"`
 	KeyFile  string `json:"keyFile"`
-	LogFile  string `json:"logFile"`
 	Database struct {
 		User     string `json:"user"`
 		Password string `json:"password"`
