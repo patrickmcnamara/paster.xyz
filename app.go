@@ -134,6 +134,11 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// get paste ID and value
 		pasteID := generateID()
 		value := r.FormValue("paste")
+		if len(value) == 0 {
+			errorHandler(w, "paste too short", "paste needs to not be empty", http.StatusInternalServerError)
+			log.Printf("%s - %s - could not submit paste, too short", method, path)
+			return
+		}
 
 		// assign to user
 		var user id
