@@ -17,7 +17,7 @@ type app struct {
 
 func (a *app) getPaste(pasteID id) (*paste, error) {
 	var p paste
-	r := a.DB.QueryRow("SELECT Paste FROM paste WHERE ID = ?", pasteID)
+	r := a.DB.QueryRow("SELECT Value FROM paste WHERE ID = ?", pasteID)
 	err := r.Scan(&p.Value)
 	return &p, err
 }
