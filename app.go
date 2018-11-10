@@ -112,8 +112,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// get paste if it exists, else return a 404
 		default:
 			id, _ := base64.RawURLEncoding.DecodeString(path[1:])
-			p, err := a.getPaste(id)
-			if err == nil {
+			if p, err := a.getPaste(id); err == nil {
 				w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 				fmt.Fprintf(w, p.Value)
 				log.Printf("%s - %s - paste found", method, path)
@@ -125,23 +124,20 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	case "POST":
 		// parse values
-		r.ParseForm()
+		err := r.ParseForm()
+		if err != nil {
+			errorHandler(w, "could not set paste", err.Error(), http.StatusInternalServerError)
+			log.Printf("%s - %s - could not submit paste - %v", method, path, err)
+			return
+		}
 
-		// create paste
+		// get paste ID and value
 		pasteID := generateID()
 		value := r.FormValue("paste")
 
-		// add to history
+		// assign to user
 		var user id
-		if c, err := r.Cookie("user"); err != nil {
-			user = generateID()
-			http.SetCookie(w, &http.Cookie{
-				Name:    "user",
-				Expires: time.Now().Add(time.Hour * 24 * 365),
-				Value:   base64.RawURLEncoding.EncodeToString(user),
-			})
-			log.Printf("%s - %s - user cookie not found, setting cookie", method, path)
-		} else {
+		if c, err := r.Cookie("user"); err == nil {
 			user, _ = base64.RawURLEncoding.DecodeString(c.Value)
 			http.SetCookie(w, &http.Cookie{
 				Name:    "user",
@@ -149,9 +145,18 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				Value:   c.Value,
 			})
 			log.Printf("%s - %s - user cookie found, refreshing cookie", method, path)
+		} else {
+			user = generateID()
+			http.SetCookie(w, &http.Cookie{
+				Name:    "user",
+				Expires: time.Now().Add(time.Hour * 24 * 365),
+				Value:   base64.RawURLEncoding.EncodeToString(user),
+			})
+			log.Printf("%s - %s - user cookie not found, setting cookie", method, path)
 		}
 
-		err := a.setPaste(&paste{
+		// create paste
+		err = a.setPaste(&paste{
 			ID:    pasteID,
 			Value: value,
 			Time:  time.Now().UTC(),
