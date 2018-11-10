@@ -28,7 +28,7 @@ func (a *app) setPaste(p *paste) error {
 }
 
 func (a *app) getHistoryPastes(user id) (ps []*paste, err error) {
-	rows, err := a.DB.Query("SELECT * FROM paste WHERE User = ? ORDER by Time DESC", user)
+	rows, err := a.DB.Query("SELECT ID, Time FROM paste WHERE User = ? ORDER by Time DESC", user)
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -36,21 +36,21 @@ func (a *app) getHistoryPastes(user id) (ps []*paste, err error) {
 	for i := 0; rows.Next() && i < 10; i++ {
 		var p paste
 		p.User = user
-		rows.Scan(&p.ID, &p.Value, &p.Time, &p.User)
+		rows.Scan(&p.ID, &p.Time)
 		ps = append(ps, &p)
 	}
 	return ps, nil
 }
 
 func (a *app) getRecentPastes() (ps []*paste, err error) {
-	rows, err := a.DB.Query("SELECT * FROM paste WHERE Time IS NOT NULL ORDER BY Time DESC")
+	rows, err := a.DB.Query("SELECT ID, Time FROM paste WHERE Time IS NOT NULL ORDER BY Time DESC")
 	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
 	for i := 0; rows.Next() && i < 10; i++ {
 		var p paste
-		rows.Scan(&p.ID, &p.Value, &p.Time, &p.User)
+		rows.Scan(&p.ID, &p.Time)
 		ps = append(ps, &p)
 	}
 	return ps, nil
