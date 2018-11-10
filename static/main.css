@@ -11,11 +11,7 @@ body {
 }
 
 #paste-box {
-    height: 66%;
+    height: 32em;
     width: 100%;
     resize: none;
-}
-
-#submit-button {
-    width: 100%;
 }
