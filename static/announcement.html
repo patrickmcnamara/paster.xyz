@@ -1,0 +1,22 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" type="text/css" media="screen" href="/static/main.css" />
+        <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+        <title>announcement - paster</title>
+    </head>
+
+    <body>
+        <h1 id="header"><a href="/">paster</a></h1>
+        <ul>
+            <li><a href="/history">History</a></li>
+            <li><a href="/recent">Recent</a></li>
+            <li><a href="/announcement">Announcement</a>*</li>
+        </ul>
+        <ul>
+        {{range .}}    <li><a href="/{{.ID}}">{{.ID}}</a> - {{.Time.Format "2006-01-02 15:04:05"}}</li>
+        {{end}}
+        </ul>
+    </body>
+</html>

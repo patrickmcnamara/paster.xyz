@@ -1,0 +1,21 @@
+* {
+    font-family: monospace, monospace;
+}
+
+body {
+    max-width: 1024px;
+    min-width: 256px;
+    margin: auto;
+    border: none;
+    padding: 16px;
+}
+
+#paste-box {
+    height: 66%;
+    width: 100%;
+    resize: none;
+}
+
+#submit-button {
+    width: 100%;
+}
