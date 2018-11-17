@@ -1,4 +1,4 @@
-module github.com/patrickmcnamara/paster
+module github.com/patrickmcnamara/paster.xyz
 
 require (
 	github.com/go-sql-driver/mysql v1.4.1
