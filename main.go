@@ -9,8 +9,8 @@ import (
 )
 
 func main() {
-	// load config file
-	cfg, err := loadConfig("config.json")
+	// load database configuration file
+	cfg, err := loadConfig("db-config.json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,18 +32,8 @@ func main() {
 	// start server
 	log.Println("Starting server...")
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
-	http.Handle("/", &app{db, cfg})
-	// serve HTTP and redirect to HTTPS
+	http.Handle("/", &app{db})
+
 	log.Print("Serving HTTP")
-	go func() {
-		log.Fatal(http.ListenAndServe(":80", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			http.Redirect(w, r, "https://"+r.Host+r.URL.Path, http.StatusMovedPermanently)
-			log.Printf("%s - redirected HTTP to HTTPS", r.URL.Path)
-		})))
-	}()
-	// serve HTTPS
-	log.Print("Serving HTTPS")
-	func() {
-		log.Fatal(http.ListenAndServeTLS(":443", cfg.CertFile, cfg.KeyFile, nil))
-	}()
+	log.Fatal(http.ListenAndServe(":80", nil))
 }

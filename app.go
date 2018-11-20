@@ -11,8 +11,7 @@ import (
 )
 
 type app struct {
-	DB  *sql.DB
-	CFG *config
+	DB *sql.DB
 }
 
 func (a *app) getPaste(pasteID id) (*paste, error) {
