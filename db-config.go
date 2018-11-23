@@ -15,7 +15,7 @@ type dbConfig struct {
 }
 
 func (cfg *dbConfig) getDataSourceName() string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", cfg.User, cfg.Password, cfg.Address, cfg.Port, cfg.Name)
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&charset=utf8mb4&collation=utf8mb4_unicode_ci", cfg.User, cfg.Password, cfg.Address, cfg.Port, cfg.Name)
 }
 
 func loadConfig(filename string) (*dbConfig, error) {
