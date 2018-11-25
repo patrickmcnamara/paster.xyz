@@ -13,7 +13,7 @@ func notFoundHandler(w http.ResponseWriter) {
 }
 
 func errorHandler(w http.ResponseWriter, title, desc string, statusCode int) {
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(statusCode)
 	t, _ := template.ParseFiles("static/error.html")
 	t.Execute(w, map[string]string{
 		"Title":       title,
