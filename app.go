@@ -115,7 +115,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			id, _ := base64.RawURLEncoding.DecodeString(path[1:])
 			if p, err := a.getPaste(id); err == nil {
 				w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-				fmt.Fprintf(w, p.Value)
+				fmt.Fprint(w, p.Value)
 				log.Printf("%s - %s - paste found", method, path)
 			} else {
 				errorHandler(w, "404 not found", "OOPSIE WOOPSIE!! 😳 Uwu 😚 We make a fucky wucky!! 🙅‍ 🤷🏼‍ A wittle fucko boingo! 🌈💫 The code monkeys 🙈🙉at our headquarters 🕍 💤 are working VEWY HAWD 💸💯 to fix this! ♿️", http.StatusNotFound)
