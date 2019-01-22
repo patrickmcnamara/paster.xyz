@@ -66,7 +66,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		switch path {
 		// serve homepage
 		case "/":
-			http.ServeFile(w, r, "static/index.html")
+			http.ServeFile(w, r, "template/index.html")
 			log.Printf("%s - %s - homepage", method, path)
 
 		// don't serve favicon and don't log
@@ -75,7 +75,8 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		// list history pastes
 		case "/history":
-			t, _ := template.ParseFiles("static/history.html")
+			var pastes []*paste
+			t, _ := template.ParseFiles("template/history.html")
 			if c, err := r.Cookie("user"); err == nil {
 				user, _ := base64.RawURLEncoding.DecodeString(c.Value)
 				pastes, err := a.getHistoryPastes(user)
@@ -85,21 +86,16 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					log.Printf("%s - %s - %s", method, path, errS)
 					return
 				}
-				t.Execute(w, map[string]interface{}{
-					"history": true,
-					"pastes":  pastes,
-				})
+				t.Execute(w, pastes)
 				log.Printf("%s - %s - user cookie found, listing history", method, path)
 			} else {
-				t.Execute(w, map[string]interface{}{
-					"history": false,
-				})
+				t.Execute(w, pastes)
 				log.Printf("%s - %s - user cookie not found, no history", method, path)
 			}
 
 		// list recent pastes
 		case "/recent":
-			t, _ := template.ParseFiles("static/recent.html")
+			t, _ := template.ParseFiles("template/recent.html")
 			pastes, err := a.getRecentPastes()
 			if err != nil {
 				errS := "could not list recent pastes"
