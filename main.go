@@ -33,6 +33,6 @@ func main() {
 	log.Println("Starting server...")
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
 	http.Handle("/", &app{db})
-	log.Print("Serving HTTP")
+	log.Print("Serving HTTP...")
 	log.Fatal(http.ListenAndServe(":80", nil))
 }
