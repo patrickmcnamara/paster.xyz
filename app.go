@@ -66,7 +66,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		switch path {
 		// serve homepage
 		case "/":
-			http.ServeFile(w, r, "template/index.html")
+			http.ServeFile(w, r, "static/index.html")
 			log.Printf("%s - %s - homepage", method, path)
 
 		// don't serve favicon and don't log
