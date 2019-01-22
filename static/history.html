@@ -13,7 +13,7 @@
             <li><a href="/history">History</a>*</li>
             <li><a href="/recent">Recent</a></li>
         </ul>
-        {{if .history}}<ul>
+        {{if .history and len .pastes > 0}}<ul>
         {{range .pastes}}    <li><a href="/{{.ID}}">{{.ID}}</a> - {{.Time.Format "2006-01-02 15:04:05"}}</li>
         {{end}}</ul>{{else}}<p>No history found.</p>{{end}}
     </body>
