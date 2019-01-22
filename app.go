@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const pasteLimit int = 20
+const pasteLimit int = 25
 
 type app struct {
 	DB *sql.DB
