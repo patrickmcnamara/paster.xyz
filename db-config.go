@@ -18,7 +18,7 @@ func (cfg *dbConfig) getDataSourceName() string {
 	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&charset=utf8mb4&collation=utf8mb4_unicode_ci", cfg.User, cfg.Password, cfg.Address, cfg.Port, cfg.Name)
 }
 
-func loadConfig(filename string) (*dbConfig, error) {
+func loadDbConfig(filename string) (*dbConfig, error) {
 	var cfg dbConfig
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {

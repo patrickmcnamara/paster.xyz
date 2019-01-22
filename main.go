@@ -10,7 +10,7 @@ import (
 
 func main() {
 	// load database configuration file
-	cfg, err := loadConfig("db-config.json")
+	cfg, err := loadDbConfig("db-config.json")
 	if err != nil {
 		log.Fatal(err)
 	}
