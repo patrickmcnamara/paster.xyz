@@ -10,7 +10,7 @@ body {
     padding: 16px;
 }
 
-.paste-input {
+#paste-form > * {
     width: 100%;
     box-sizing: border-box;
 }
@@ -18,4 +18,9 @@ body {
 #paste-box {
     height: 32em;
     resize: none;
+}
+
+#footer-text {
+    font-size: 0.75em;
+    font-style: italic;
 }

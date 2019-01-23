@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const pasteLimit int = 25
+const pasteLimit int = 24
 
 type app struct {
 	DB *sql.DB
@@ -59,6 +59,7 @@ func (a *app) getRecentPastes() (ps []*paste, err error) {
 
 func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
+	title := path[1:]
 	method := r.Method
 
 	switch method {
@@ -66,7 +67,8 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		switch path {
 		// serve homepage
 		case "/":
-			http.ServeFile(w, r, "static/index.html")
+			t, _ := template.ParseFiles("template/page.tmpl", "template/index.tmpl")
+			t.ExecuteTemplate(w, "index-page", "paster")
 			log.Printf("%s - %s - homepage", method, path)
 
 		// don't serve favicon and don't log
@@ -76,7 +78,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// list history pastes
 		case "/history":
 			var pastes []*paste
-			t, _ := template.ParseFiles("template/history.html")
+			t, _ := template.ParseFiles("template/page.tmpl", "template/list.tmpl")
 			if c, err := r.Cookie("user"); err == nil {
 				user, _ := base64.RawURLEncoding.DecodeString(c.Value)
 				pastes, err := a.getHistoryPastes(user)
@@ -86,16 +88,23 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					log.Printf("%s - %s - %s", method, path, errS)
 					return
 				}
-				t.Execute(w, pastes)
+				t.ExecuteTemplate(w, "list-page", map[string]interface{}{
+					"Title":  title,
+					"Pastes": pastes,
+				})
 				log.Printf("%s - %s - user cookie found, listing history", method, path)
 			} else {
-				t.Execute(w, pastes)
+				t.ExecuteTemplate(w, "list-page", map[string]interface{}{
+					"Title":  title,
+					"Pastes": pastes,
+				})
 				log.Printf("%s - %s - user cookie not found, no history", method, path)
 			}
 
 		// list recent pastes
 		case "/recent":
-			t, _ := template.ParseFiles("template/recent.html")
+			var pastes []*paste
+			t, _ := template.ParseFiles("template/page.tmpl", "template/list.tmpl")
 			pastes, err := a.getRecentPastes()
 			if err != nil {
 				errS := "could not list recent pastes"
@@ -103,7 +112,10 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				log.Printf("%s - %s - %s", method, path, errS)
 				return
 			}
-			t.Execute(w, pastes)
+			t.ExecuteTemplate(w, "list-page", map[string]interface{}{
+				"Title":  title,
+				"Pastes": pastes,
+			})
 			log.Printf("%s - %s - listing recent pastes", method, path)
 
 		// get paste if it exists, else return a 404
@@ -130,10 +142,15 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		// get paste ID and value
 		pasteID := generateID()
-		value := r.FormValue("value")
+		value := r.FormValue("paste")
+		fmt.Println("paste =", len(value))
 		if len(value) == 0 {
-			errorHandler(w, "paste too short", "paste needs to not be empty", http.StatusInternalServerError)
-			log.Printf("%s - %s - could not submit paste, too short, %s", method, path, value)
+			errorHandler(w, "paste too short", "paste needs to not be empty", http.StatusBadRequest)
+			log.Printf("%s - %s - could not submit paste, too short", method, path)
+			return
+		} else if len([]byte(value)) >= 65536 {
+			errorHandler(w, "paste too long", "paste needs to be shorter than 65536 bytes", http.StatusRequestEntityTooLarge)
+			log.Printf("%s - %s - could not submit paste, too long", method, path)
 			return
 		}
 
