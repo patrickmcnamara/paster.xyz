@@ -153,8 +153,22 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		list := r.FormValue("List") == "list"
-		expiryValue, err := time.Parse(time.RFC3339[:16], r.FormValue("Expiry"))
-		expiry := nullTime{expiryValue, err == nil}
+		expiryValue := r.FormValue("Expiry")
+		expiryTime, err := time.Parse(time.RFC3339[:16], expiryValue)
+		var expiry nullTime
+		if expiryValue == "" {
+			expiry = nullTime{expiryTime, false}
+		} else if err != nil {
+			errorHandler(w, "invalid expiry", "expiry must be after the current time", http.StatusBadRequest)
+			log.Printf("%s - %s - could not submit paste, invalid expiry", method, path)
+			return
+		} else if !expiryTime.After(time.Now()) {
+			errorHandler(w, "expiry before current time", "expiry must be after the current time", http.StatusBadRequest)
+			log.Printf("%s - %s - could not submit paste, expiry before current time", method, path)
+			return
+		} else {
+			expiry = nullTime{expiryTime, true}
+		}
 
 		// assign to User
 		var user id

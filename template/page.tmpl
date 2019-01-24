@@ -36,7 +36,7 @@
       </form>{{end}}
 
 {{define "paste-list"}}      {{if .}}<ul>
-      {{range .}}  <li><a href="/{{.ID}}">{{.ID}}</a> - {{.Time.Format "2006-01-02 15:04:05"}}{{if .Expiry.Valid}} - {{.Expiry.Time.Format "2006-01-02 15:04 PM"}}{{end}}</li>
+      {{range .}}  <li><a href="/{{.ID}}">{{.ID}}</a> - {{.Time.Format "2006-01-02 15:04:05"}}{{if .Expiry.Valid}} until {{.Expiry.Time.Format "2006-01-02 15:04:05"}}{{end}}</li>
       {{end}}</ul>{{else}}<p>Nothing found.</p>{{end}}{{end}}
 
 {{define "error"}}      <h2>{{.Title}}</h2>
