@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	pasteLength     int = 64 << 10 // 64 KiB paste length limit
-	pasteListLength int = 24       // 24 rows in paste lists
+	pasteLength     int = 5 << 20 // 5 MiB paste length limit
+	pasteListLength int = 24      // 24 rows in paste lists
 )
 
 type app struct {
@@ -143,19 +143,25 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// get paste ID, Value, List and Expiry
+		// generate paste ID
 		pasteID := generateID()
+
+		// get Value and validate
 		value := r.FormValue("Value")
 		if len(value) == 0 {
 			errorHandler(w, "value too short", "value must not be empty", http.StatusBadRequest)
 			log.Printf("%s - %s - could not submit paste, too short", method, path)
 			return
 		} else if len([]byte(value)) >= pasteLength {
-			errorHandler(w, "value too long", "value must be less than 64 kibibytes", http.StatusRequestEntityTooLarge)
+			errorHandler(w, "value too long", "value must be less than 5 mebibytes", http.StatusRequestEntityTooLarge)
 			log.Printf("%s - %s - could not submit paste, too long", method, path)
 			return
 		}
+
+		// get List
 		list := r.FormValue("List") == "list"
+
+		// get Expiry and validate
 		expiryValue := r.FormValue("Expiry")
 		expiryTime, err := time.Parse(time.RFC3339[:16], expiryValue)
 		var expiry nullTime
@@ -173,7 +179,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			expiry = nullTime{expiryTime, true}
 		}
 
-		// assign to User
+		// assign to User, if it exists, else generate User
 		var user id
 		if c, err := r.Cookie("user"); err == nil {
 			user, _ = base64.RawURLEncoding.DecodeString(c.Value)
