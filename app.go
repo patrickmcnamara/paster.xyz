@@ -10,7 +10,10 @@ import (
 	"time"
 )
 
-const pasteLimit int = 24
+const (
+	pasteLength     int = 64 << 10 // 64 KiB paste length limit
+	pasteListLength int = 24       // 24 rows in paste lists
+)
 
 type app struct {
 	DB *sql.DB
@@ -29,7 +32,7 @@ func (a *app) setPaste(p *paste) error {
 }
 
 func (a *app) getHistoryPastes(user id) (ps []*paste, err error) {
-	rows, err := a.DB.Query("SELECT ID, Time, Expiry FROM paste WHERE User = ? AND (Expiry IS NULL OR Expiry > NOW()) ORDER by Time DESC LIMIT ?", user, pasteLimit)
+	rows, err := a.DB.Query("SELECT ID, Time, Expiry FROM paste WHERE User = ? AND (Expiry IS NULL OR Expiry > NOW()) ORDER by Time DESC LIMIT ?", user, pasteListLength)
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -44,7 +47,7 @@ func (a *app) getHistoryPastes(user id) (ps []*paste, err error) {
 }
 
 func (a *app) getRecentPastes() (ps []*paste, err error) {
-	rows, err := a.DB.Query("SELECT ID, Time, Expiry FROM paste WHERE List AND (Expiry IS NULL OR Expiry > NOW()) ORDER BY Time DESC LIMIT ?", pasteLimit)
+	rows, err := a.DB.Query("SELECT ID, Time, Expiry FROM paste WHERE List AND (Expiry IS NULL OR Expiry > NOW()) ORDER BY Time DESC LIMIT ?", pasteListLength)
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -144,11 +147,11 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		pasteID := generateID()
 		value := r.FormValue("Value")
 		if len(value) == 0 {
-			errorHandler(w, "paste too short", "paste needs to not be empty", http.StatusBadRequest)
+			errorHandler(w, "value too short", "value must not be empty", http.StatusBadRequest)
 			log.Printf("%s - %s - could not submit paste, too short", method, path)
 			return
-		} else if len([]byte(value)) >= 65536 {
-			errorHandler(w, "paste too long", "paste needs to be shorter than 65536 bytes", http.StatusRequestEntityTooLarge)
+		} else if len([]byte(value)) >= pasteLength {
+			errorHandler(w, "value too long", "value must be less than 64 kibibytes", http.StatusRequestEntityTooLarge)
 			log.Printf("%s - %s - could not submit paste, too long", method, path)
 			return
 		}
