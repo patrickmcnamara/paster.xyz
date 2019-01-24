@@ -23,8 +23,12 @@
     <main>{{end}}
 
 {{define "paste-box"}}      <form id="paste-form" action="/" method="post">
-        <textarea id="paste-box" form="paste-form" name="paste" required></textarea>
-        <input type="submit" value="submit">
+        <textarea id="paste-box" form="paste-form" name="Value" required></textarea>
+        <div id="paste-checkbox">
+          <label for="List">list on recents</label>
+          <input type="checkbox" name="List" value="list" checked>
+        </div>
+        <input id="paste-button" type="submit" value="submit">
       </form>{{end}}
 
 {{define "paste-list"}}      {{if .}}<ul>

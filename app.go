@@ -24,7 +24,7 @@ func (a *app) getPaste(pasteID id) (*paste, error) {
 }
 
 func (a *app) setPaste(p *paste) error {
-	_, err := a.DB.Exec("INSERT INTO paste VALUES (?, ?, ?, ?)", p.ID, p.Value, p.Time, p.User)
+	_, err := a.DB.Exec("INSERT INTO paste (ID, Value, Time, User, List) VALUES (?, ?, ?, ?, ?)", p.ID, p.Value, p.Time, p.User, p.List)
 	return err
 }
 
@@ -44,7 +44,7 @@ func (a *app) getHistoryPastes(user id) (ps []*paste, err error) {
 }
 
 func (a *app) getRecentPastes() (ps []*paste, err error) {
-	rows, err := a.DB.Query("SELECT ID, Time FROM paste WHERE Time IS NOT NULL ORDER BY Time DESC LIMIT ?", pasteLimit)
+	rows, err := a.DB.Query("SELECT ID, Time FROM paste WHERE List ORDER BY Time DESC LIMIT ?", pasteLimit)
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -142,7 +142,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		// get paste ID and value
 		pasteID := generateID()
-		value := r.FormValue("paste")
+		value := r.FormValue("Value")
 		if len(value) == 0 {
 			errorHandler(w, "paste too short", "paste needs to not be empty", http.StatusBadRequest)
 			log.Printf("%s - %s - could not submit paste, too short", method, path)
@@ -152,6 +152,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			log.Printf("%s - %s - could not submit paste, too long", method, path)
 			return
 		}
+		list := r.FormValue("List") == "list"
 
 		// assign to user
 		var user id
@@ -179,6 +180,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Value: value,
 			Time:  time.Now().UTC(),
 			User:  user,
+			List:  list,
 		})
 		if err != nil {
 			errorHandler(w, "could not set paste", err.Error(), http.StatusInternalServerError)

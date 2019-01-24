@@ -23,4 +23,5 @@ type paste struct {
 	Value string
 	Time  time.Time
 	User  id
+	List  bool
 }

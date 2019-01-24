@@ -10,17 +10,23 @@ body {
     padding: 16px;
 }
 
-#paste-form > * {
+#paste-box {
     width: 100%;
+    height: 24em;
+    resize: none;
     box-sizing: border-box;
 }
 
-#paste-box {
-    height: 32em;
-    resize: none;
+#paste-checkbox {
+    margin-top: .5em;
+    margin-bottom: .5em;
+}
+
+#paste-button {
+    width: 100%;
 }
 
 #footer-text {
-    font-size: 0.75em;
+    font-size: .75em;
     font-style: italic;
 }
