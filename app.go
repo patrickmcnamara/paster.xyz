@@ -18,18 +18,18 @@ type app struct {
 
 func (a *app) getPaste(pasteID id) (*paste, error) {
 	var p paste
-	r := a.DB.QueryRow("SELECT Value FROM paste WHERE ID = ?", pasteID)
+	r := a.DB.QueryRow("SELECT Value FROM paste WHERE ID = ? AND (Expiry IS NULL OR Expiry > NOW())", pasteID)
 	err := r.Scan(&p.Value)
 	return &p, err
 }
 
 func (a *app) setPaste(p *paste) error {
-	_, err := a.DB.Exec("INSERT INTO paste (ID, Value, Time, User, List) VALUES (?, ?, ?, ?, ?)", p.ID, p.Value, p.Time, p.User, p.List)
+	_, err := a.DB.Exec("INSERT INTO paste (ID, Value, Time, Expiry, User, List) VALUES (?, ?, ?, ?, ?, ?)", p.ID, p.Value, p.Time, p.Expiry, p.User, p.List)
 	return err
 }
 
 func (a *app) getHistoryPastes(user id) (ps []*paste, err error) {
-	rows, err := a.DB.Query("SELECT ID, Time FROM paste WHERE User = ? ORDER by Time DESC LIMIT ?", user, pasteLimit)
+	rows, err := a.DB.Query("SELECT ID, Time, Expiry FROM paste WHERE User = ? AND (Expiry IS NULL OR Expiry > NOW()) ORDER by Time DESC LIMIT ?", user, pasteLimit)
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -37,21 +37,21 @@ func (a *app) getHistoryPastes(user id) (ps []*paste, err error) {
 	for rows.Next() {
 		var p paste
 		p.User = user
-		rows.Scan(&p.ID, &p.Time)
+		rows.Scan(&p.ID, &p.Time, &p.Expiry)
 		ps = append(ps, &p)
 	}
 	return ps, nil
 }
 
 func (a *app) getRecentPastes() (ps []*paste, err error) {
-	rows, err := a.DB.Query("SELECT ID, Time FROM paste WHERE List ORDER BY Time DESC LIMIT ?", pasteLimit)
+	rows, err := a.DB.Query("SELECT ID, Time, Expiry FROM paste WHERE List AND (Expiry IS NULL OR Expiry > NOW()) ORDER BY Time DESC LIMIT ?", pasteLimit)
 	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
 		var p paste
-		rows.Scan(&p.ID, &p.Time)
+		rows.Scan(&p.ID, &p.Time, &p.Expiry)
 		ps = append(ps, &p)
 	}
 	return ps, nil
@@ -140,7 +140,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// get paste ID and value
+		// get paste ID, Value, List and Expiry
 		pasteID := generateID()
 		value := r.FormValue("Value")
 		if len(value) == 0 {
@@ -153,8 +153,10 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		list := r.FormValue("List") == "list"
+		expiryValue, err := time.Parse(time.RFC3339[:16], r.FormValue("Expiry"))
+		expiry := nullTime{expiryValue, err == nil}
 
-		// assign to user
+		// assign to User
 		var user id
 		if c, err := r.Cookie("user"); err == nil {
 			user, _ = base64.RawURLEncoding.DecodeString(c.Value)
@@ -174,13 +176,14 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			log.Printf("%s - %s - user cookie not found, setting cookie", method, path)
 		}
 
-		// create paste
+		// create and set paste
 		err = a.setPaste(&paste{
-			ID:    pasteID,
-			Value: value,
-			Time:  time.Now().UTC(),
-			User:  user,
-			List:  list,
+			ID:     pasteID,
+			Value:  value,
+			Time:   time.Now().UTC(),
+			Expiry: expiry,
+			User:   user,
+			List:   list,
 		})
 		if err != nil {
 			errorHandler(w, "could not set paste", err.Error(), http.StatusInternalServerError)

@@ -24,15 +24,19 @@
 
 {{define "paste-box"}}      <form id="paste-form" action="/" method="post">
         <textarea id="paste-box" form="paste-form" name="Value" required></textarea>
-        <div id="paste-checkbox">
+        <div class="paste-option" id="paste-checkbox">
           <label for="List">list on recents</label>
           <input type="checkbox" name="List" value="list" checked>
+        </div>
+        <div class="paste-option" id="paste-datetime-local">
+          <label for="List">expires on</label>
+          <input type="datetime-local" name="Expiry">
         </div>
         <input id="paste-button" type="submit" value="submit">
       </form>{{end}}
 
 {{define "paste-list"}}      {{if .}}<ul>
-      {{range .}}  <li><a href="/{{.ID}}">{{.ID}}</a> - {{.Time.Format "2006-01-02 15:04:05"}}</li>
+      {{range .}}  <li><a href="/{{.ID}}">{{.ID}}</a> - {{.Time.Format "2006-01-02 15:04:05"}}{{if .Expiry.Valid}} - {{.Expiry.Time.Format "2006-01-02 15:04 PM"}}{{end}}</li>
       {{end}}</ul>{{else}}<p>Nothing found.</p>{{end}}{{end}}
 
 {{define "error"}}      <h2>{{.Title}}</h2>
