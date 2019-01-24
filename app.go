@@ -143,7 +143,6 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// get paste ID and value
 		pasteID := generateID()
 		value := r.FormValue("paste")
-		fmt.Println("paste =", len(value))
 		if len(value) == 0 {
 			errorHandler(w, "paste too short", "paste needs to not be empty", http.StatusBadRequest)
 			log.Printf("%s - %s - could not submit paste, too short", method, path)
