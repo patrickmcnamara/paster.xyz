@@ -12,10 +12,12 @@
 
 {{define "header"}}    <header>
       <h1><a href="/">paster</a>{{if .}}{{if eq . "paster"}}*{{end}}{{end}}</h1>
-      <ul>
-        <li><a href="/history">History</a>{{if .}}{{if eq . "history"}}*{{end}}{{end}}</li>
-        <li><a href="/recent">Recent</a>{{if .}}{{if eq . "recent"}}*{{end}}{{end}}</li>
-      </ul>
+      <nav>
+        <ul>
+          <li><a href="/history">History</a>{{if .}}{{if eq . "history"}}*{{end}}{{end}}</li>
+          <li><a href="/recent">Recent</a>{{if .}}{{if eq . "recent"}}*{{end}}{{end}}</li>
+        </ul>
+      </nav>
     </header>
 
     <main>{{end}}
