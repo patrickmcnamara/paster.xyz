@@ -1,4 +1,5 @@
 {{define "error-page"}}{{template "head" .Title}}
 {{template "header"}}
-{{template "error" .}}
+      <h2>error - {{.Title}}</h2>
+      <p>{{.Description}}</p>
 {{template "footer"}}{{end}}

@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -62,7 +63,7 @@ func (a *app) getRecentPastes() (ps []*paste, err error) {
 
 func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
-	title := path[1:]
+	title := strings.Replace(path[1:], "-", " ", -1)
 	method := r.Method
 
 	switch method {
@@ -71,7 +72,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// serve homepage
 		case "/":
 			t, _ := template.ParseFiles("template/page.tmpl", "template/index.tmpl")
-			t.ExecuteTemplate(w, "index-page", "paster")
+			t.ExecuteTemplate(w, "index-page", "index")
 			log.Printf("%s - %s - homepage", method, path)
 
 		// don't serve favicon and don't log
@@ -80,7 +81,6 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		// list history pastes
 		case "/history":
-			var pastes []*paste
 			t, _ := template.ParseFiles("template/page.tmpl", "template/list.tmpl")
 			if c, err := r.Cookie("user"); err == nil {
 				user, _ := base64.RawURLEncoding.DecodeString(c.Value)
@@ -97,16 +97,12 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				})
 				log.Printf("%s - %s - user cookie found, listing history", method, path)
 			} else {
-				t.ExecuteTemplate(w, "list-page", map[string]interface{}{
-					"Title":  title,
-					"Pastes": pastes,
-				})
+				t.ExecuteTemplate(w, "list-page", map[string]interface{}{"Title": title})
 				log.Printf("%s - %s - user cookie not found, no history", method, path)
 			}
 
 		// list recent pastes
 		case "/recent":
-			var pastes []*paste
 			t, _ := template.ParseFiles("template/page.tmpl", "template/list.tmpl")
 			pastes, err := a.getRecentPastes()
 			if err != nil {
@@ -120,6 +116,11 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				"Pastes": pastes,
 			})
 			log.Printf("%s - %s - listing recent pastes", method, path)
+
+		case "/other", "/contact", "/privacy-policy", "/cookie-policy":
+			t, _ := template.ParseFiles("template/page.tmpl", "template/"+strings.Replace(title, " ", "-", -1)+".tmpl")
+			t.ExecuteTemplate(w, strings.Replace(title, " ", "-", -1)+"-page", title)
+			log.Printf("%s - %s - %s", method, path, title)
 
 		// get paste if it exists, else return a 404
 		default:

@@ -11,41 +11,22 @@
   <body>{{end}}
 
 {{define "header"}}    <header>
-      <h1><a href="/">paster</a>{{if .}}{{if eq . "paster"}}*{{end}}{{end}}</h1>
+      <h1><a href="/">paster</a>{{if .}}{{if eq . "index"}}*{{end}}{{end}}</h1>
       <nav>
         <ul>
           <li><a href="/history">History</a>{{if .}}{{if eq . "history"}}*{{end}}{{end}}</li>
           <li><a href="/recent">Recent</a>{{if .}}{{if eq . "recent"}}*{{end}}{{end}}</li>
+          <li><a href="/other">Other</a>{{if .}}{{if eq . "other"}}*{{end}}{{end}}</li>
         </ul>
       </nav>
     </header>
 
     <main>{{end}}
 
-{{define "paste-box"}}      <form id="paste-form" action="/" method="post">
-        <textarea id="paste-box" form="paste-form" name="Value" required></textarea>
-        <div class="paste-option" id="paste-checkbox">
-          <label for="List">list on recents</label>
-          <input type="checkbox" name="List" value="list" checked>
-        </div>
-        <div class="paste-option" id="paste-datetime-local">
-          <label for="List">expires on</label>
-          <input type="datetime-local" name="Expiry">
-        </div>
-        <input id="paste-button" type="submit" value="submit">
-      </form>{{end}}
-
-{{define "paste-list"}}      {{if .}}<ul>
-      {{range .}}  <li><a href="/{{.ID}}">{{.ID}}</a> - {{.Time.Format "2006-01-02 15:04:05"}}{{if .Expiry.Valid}} until {{.Expiry.Time.Format "2006-01-02 15:04:05"}}{{end}}</li>
-      {{end}}</ul>{{else}}<p>Nothing found.</p>{{end}}{{end}}
-
-{{define "error"}}      <h2>{{.Title}}</h2>
-      <p>{{.Description}}</p>{{end}}
-
 {{define "footer"}}    </main>
 
     <footer>
-      <p id="footer-text">Contact <a href="mailto:admin@paster.xyz">admin@paster.xyz</a> for inquiries. <a href="https://github.com/patrickmcnamara/paster.xyz/">Source code here.</a></p>
+      <p id="footer-text">paster.xyz is <strong>under development</strong>, use at your own risk</p>
     </footer>
   </body>
 </html>{{end}}

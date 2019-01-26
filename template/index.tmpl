@@ -1,4 +1,15 @@
 {{define "index-page"}}{{template "head"}}
 {{template "header" .}}
-{{template "paste-box"}}
+      <form id="paste-form" action="/" method="post">
+        <textarea id="paste-box" form="paste-form" name="Value" required></textarea>
+        <div class="paste-option" id="paste-checkbox">
+          <label for="List">list on recents</label>
+          <input type="checkbox" name="List" value="list" checked>
+        </div>
+        <div class="paste-option" id="paste-datetime-local">
+          <label for="List">expires on</label>
+          <input type="datetime-local" name="Expiry">
+        </div>
+        <input id="paste-button" type="submit" value="submit">
+      </form>
 {{template "footer"}}{{end}}
