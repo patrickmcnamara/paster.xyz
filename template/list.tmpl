@@ -1,6 +1,6 @@
 {{define "list-page"}}{{template "head" .Title}}
 {{template "header" .Title}}
       {{if .Pastes}}<ul>
-      {{range .Pastes}}  <li><a href="/{{.ID}}">{{.ID}}</a> - {{.Time.Format "2006-01-02 15:04:05"}}{{if .Expiry.Valid}} until {{.Expiry.Time.Format "2006-01-02 15:04:05"}}{{end}}</li>
+      {{range .Pastes}}  <li><a href="/{{.ID}}">{{.ID}}</a> - {{.Time.Format "2006-01-02 15:04:05"}}{{if .Expiry.Valid}} > {{.Expiry.Time.Format "2006-01-02 15:04:05"}}{{end}}</li>
       {{end}}</ul>{{else}}<p>Nothing found.</p>{{end}}
 {{template "footer"}}{{end}}
