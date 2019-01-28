@@ -71,8 +71,13 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		switch path {
 		// serve homepage
 		case "/":
+			now := time.Now().UTC()
 			t, _ := template.ParseFiles("template/page.tmpl", "template/index.tmpl")
-			t.ExecuteTemplate(w, "index-page", "index")
+			t.ExecuteTemplate(w, "index-page", map[string]interface{}{
+				"Title":   "index",
+				"MinTime": now,
+				"MaxTime": now.AddDate(5, 0, 0),
+			})
 			log.Printf("%s - %s - homepage", method, path)
 
 		// don't serve favicon and don't log
