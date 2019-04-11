@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://paster.xyz/</loc>
+    <priority>1.00</priority>
+  </url>
+  <url>
+    <loc>https://paster.xyz/history</loc>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://paster.xyz/recent</loc>
+    <changefreq>always</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://paster.xyz/other</loc>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://paster.xyz/contact</loc>
+    <priority>0.64</priority>
+  </url>
+  <url>
+    <loc>https://paster.xyz/cookie-policy</loc>
+    <priority>0.64</priority>
+  </url>
+  <url>
+    <loc>https://paster.xyz/privacy-policy</loc>
+    <priority>0.64</priority>
+  </url>
+</urlset>
