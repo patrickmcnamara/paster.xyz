@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="A very minimal paste website. Simply paste, submit and get a link." />
     <link rel="stylesheet" type="text/css" media="screen" href="/static/main.css" />
-    <title>{{if .}}{{.}} - {{end}}paster</title>
+    <title>{{if .}}{{.}} - {{end}}paster.xyz</title>
   </head>
 
   <body>{{end}}
 
 {{define "header"}}    <header>
-      <h1><a href="/">paster</a>{{if .}}{{if eq . "index"}}*{{end}}{{end}}</h1>
+      <h1><a{{if .}}{{if eq . "index"}} id="current-page"{{end}}{{end}} href="/">paster.xyz</a></h1>
       <nav>
         <ul>
-          <li><a href="/history">History</a>{{if .}}{{if eq . "history"}}*{{end}}{{end}}</li>
-          <li><a href="/recent">Recent</a>{{if .}}{{if eq . "recent"}}*{{end}}{{end}}</li>
-          <li><a href="/other">Other</a>{{if .}}{{if eq . "other"}}*{{end}}{{end}}</li>
+          <li><a{{if .}}{{if eq . "history"}} id="current-page"{{end}}{{end}} href="/history">History</a></li>
+          <li><a{{if .}}{{if eq . "recent"}} id="current-page"{{end}}{{end}} href="/recent">Recent</a></li>
+          <li><a{{if .}}{{if eq . "other"}} id="current-page"{{end}}{{end}} href="/other">Other</a></li>
         </ul>
       </nav>
     </header>

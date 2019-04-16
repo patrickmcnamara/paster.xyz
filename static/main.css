@@ -1,13 +1,16 @@
-* {
-    font-family: monospace, monospace;
-}
-
 body {
-    max-width: 1024px;
-    min-width: 256px;
+    font-family: monospace, monospace;
+    font-style: normal;
+    max-width: 64rem;
+    min-width: 16rem;
     margin: auto;
     border: none;
-    padding: 16px;
+    padding: 1rem;
+}
+
+#current-page {
+    font-style: italic;
+    font-weight: bold;
 }
 
 #paste-box {
@@ -24,9 +27,4 @@ body {
 
 #paste-button {
     width: 100%;
-}
-
-#footer-text {
-    font-size: .75em;
-    font-style: italic;
 }
