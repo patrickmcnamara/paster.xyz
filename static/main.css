@@ -1,6 +1,5 @@
 body {
     font-family: monospace, monospace;
-    font-style: normal;
     max-width: 64rem;
     min-width: 16rem;
     margin: auto;
@@ -10,7 +9,6 @@ body {
 
 #current-page {
     font-style: italic;
-    font-weight: bold;
 }
 
 #paste-box {
