@@ -136,7 +136,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				log.Printf("%s - %s - paste found", method, path)
 			} else {
 				errorHandler(w, "404 not found", "OOPSIE WOOPSIE!! 😳 Uwu 😚 We make a fucky wucky!! 🙅‍ 🤷🏼‍ A wittle fucko boingo! 🌈💫 The code monkeys 🙈🙉at our headquarters 🕍 💤 are working VEWY HAWD 💸💯 to fix this! ♿️", http.StatusNotFound)
-				log.Printf("%s - %s - paste not found", method, path)
+				log.Printf("%s - %s - page not found", method, path)
 			}
 		}
 
