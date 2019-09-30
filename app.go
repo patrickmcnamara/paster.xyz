@@ -58,8 +58,12 @@ func (a *app) getRecentPastes() (ps []paste, err error) {
 		ps = append(ps, p)
 	}
 	return
-	}
-	return ps, nil
+}
+
+func (a *app) getLatestPasteID() (i id, err error) {
+	r := a.DB.QueryRow("SELECT ID FROM paste WHERE List AND (Expiry IS NULL OR Expiry > NOW()) ORDER BY Time DESC LIMIT 1")
+	err = r.Scan(&i)
+	return
 }
 
 func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -84,6 +88,17 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// don't serve favicon and don't log
 		case "/favicon.ico":
 			http.NotFound(w, r)
+
+		// serve latest paste
+		case "/latest":
+			id, err := a.getLatestPasteID()
+			if err != nil {
+				errS := "could not list history"
+				errorHandler(w, errS, err.Error(), http.StatusInternalServerError)
+				log.Printf("%s - %s - %s", method, path, errS)
+				return
+			}
+			http.Redirect(w, r, "/"+id.String(), http.StatusSeeOther)
 
 		// list history pastes
 		case "/history":
