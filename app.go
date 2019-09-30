@@ -20,43 +20,44 @@ type app struct {
 	DB *sql.DB
 }
 
-func (a *app) getPaste(pasteID id) (*paste, error) {
-	var p paste
+func (a *app) getPaste(pasteID id) (p paste, err error) {
 	r := a.DB.QueryRow("SELECT Value FROM paste WHERE ID = ? AND (Expiry IS NULL OR Expiry > NOW())", pasteID)
-	err := r.Scan(&p.Value)
-	return &p, err
+	err = r.Scan(&p.Value)
+	return
 }
 
-func (a *app) setPaste(p *paste) error {
+func (a *app) setPaste(p paste) error {
 	_, err := a.DB.Exec("INSERT INTO paste (ID, Value, Time, Expiry, User, List) VALUES (?, ?, ?, ?, ?, ?)", p.ID, p.Value, p.Time, p.Expiry, p.User, p.List)
 	return err
 }
 
-func (a *app) getHistoryPastes(user id) (ps []*paste, err error) {
+func (a *app) getHistoryPastes(user id) (ps []paste, err error) {
 	rows, err := a.DB.Query("SELECT ID, Time, Expiry FROM paste WHERE User = ? AND (Expiry IS NULL OR Expiry > NOW()) ORDER by Time DESC LIMIT ?", user, pasteListLength)
 	defer rows.Close()
 	if err != nil {
-		return nil, err
+		return
 	}
 	for rows.Next() {
 		var p paste
 		p.User = user
 		rows.Scan(&p.ID, &p.Time, &p.Expiry)
-		ps = append(ps, &p)
+		ps = append(ps, p)
 	}
-	return ps, nil
+	return
 }
 
-func (a *app) getRecentPastes() (ps []*paste, err error) {
+func (a *app) getRecentPastes() (ps []paste, err error) {
 	rows, err := a.DB.Query("SELECT ID, Time, Expiry FROM paste WHERE List AND (Expiry IS NULL OR Expiry > NOW()) ORDER BY Time DESC LIMIT ?", pasteListLength)
 	defer rows.Close()
 	if err != nil {
-		return nil, err
+		return
 	}
 	for rows.Next() {
 		var p paste
 		rows.Scan(&p.ID, &p.Time, &p.Expiry)
-		ps = append(ps, &p)
+		ps = append(ps, p)
+	}
+	return
 	}
 	return ps, nil
 }
@@ -206,7 +207,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// create and set paste
-		err = a.setPaste(&paste{
+		err = a.setPaste(paste{
 			ID:     pasteID,
 			Value:  value,
 			Time:   time.Now().UTC(),
