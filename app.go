@@ -1,6 +1,8 @@
 package main
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"database/sql"
 	"encoding/base64"
 	"fmt"
@@ -55,6 +57,20 @@ func (a *app) getRecentPastes() (ps []paste, err error) {
 	for rows.Next() {
 		var p paste
 		rows.Scan(&p.ID, &p.Time, &p.Expiry)
+		ps = append(ps, p)
+	}
+	return
+}
+
+func (a *app) getAllPastes() (ps []paste, err error) {
+	rows, err := a.DB.Query("SELECT ID, Time, Value FROM paste WHERE List AND (Expiry IS NULL OR Expiry > NOW()) ORDER BY Time DESC")
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+	for rows.Next() {
+		var p paste
+		rows.Scan(&p.ID, &p.Time, &p.Value)
 		ps = append(ps, p)
 	}
 	return
@@ -138,10 +154,28 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			})
 			log.Printf("%s - %s - listing recent pastes", method, path)
 
+		// other stuff
 		case "/other", "/contact", "/privacy-policy", "/cookie-policy":
 			t, _ := template.ParseFiles("template/page.tmpl", "template/"+strings.Replace(title, " ", "-", -1)+".tmpl")
 			t.ExecuteTemplate(w, strings.Replace(title, " ", "-", -1)+"-page", title)
 			log.Printf("%s - %s - %s", method, path, title)
+
+		// paster.xyz backup
+		case "/paster-xyz.tar.gz":
+			ps, _ := a.getAllPastes()
+			gzw := gzip.NewWriter(w)
+			defer gzw.Close()
+			tgz := tar.NewWriter(gzw)
+			defer tgz.Close()
+			for _, paste := range ps {
+				tgz.WriteHeader(&tar.Header{
+					Name:    base64.RawURLEncoding.EncodeToString(paste.ID),
+					Size:    int64(len(paste.Value)),
+					Mode:    0666,
+					ModTime: paste.Time,
+				})
+				tgz.Write([]byte(paste.Value))
+			}
 
 		// get paste if it exists, else return a 404
 		default:
