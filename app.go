@@ -105,6 +105,10 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case "/favicon.ico":
 			http.NotFound(w, r)
 
+		// status page
+		case "/status":
+			fmt.Fprintln(w, "UP")
+
 		// serve latest paste
 		case "/latest":
 			id, err := a.getLatestPasteID()
