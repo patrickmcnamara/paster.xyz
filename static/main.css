@@ -16,11 +16,7 @@ body {
     height: 24em;
     resize: none;
     box-sizing: border-box;
-}
-
-.paste-option {
-    margin-top: .5em;
-    margin-bottom: .5em;
+    margin-bottom: 1rem;
 }
 
 #paste-button {

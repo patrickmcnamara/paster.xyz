@@ -1,15 +1,7 @@
 {{define "index-page"}}{{template "head"}}
-{{template "header" .Title}}
+{{template "header" "index"}}
       <form id="paste-form" action="/" method="post">
-        <textarea id="paste-box" form="paste-form" name="Value" aria-label="paste box" required></textarea>
-        <div class="paste-option" id="paste-checkbox">
-          <label for="paste-list-checkbox">list on recents</label>
-          <input id="paste-list-checkbox" type="checkbox" name="List" value="list" checked>
-        </div>
-        <div class="paste-option" id="paste-datetime-local">
-          <label for="paste-expiry-datetime">expires on</label>
-          <input id="paste-expiry-datetime" type="datetime-local" name="Expiry" min="{{.MinTime.Format "2006-01-02T15:04"}}" max="{{.MaxTime.Format "2006-01-02T15:04"}}">
-        </div>
-        <input id="paste-button" type="submit" value="submit">
+        <textarea id="paste-box" name="Value" aria-label="paste box" required></textarea>
+        <button id="paste-button">submit</button>
       </form>
 {{template "footer"}}{{end}}
