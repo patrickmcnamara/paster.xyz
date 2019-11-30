@@ -78,7 +78,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// serve homepage
 		case "/":
 			t, _ := template.ParseFiles("template/page.tmpl", "template/index.tmpl")
-			t.ExecuteTemplate(w, "index-page", nil)
+			t.ExecuteTemplate(w, "index-page", pasteLength)
 			log.Printf("%s - %s - homepage", method, path)
 
 		// don't serve favicon and don't log

@@ -1,7 +1,7 @@
 {{define "index-page"}}{{template "head"}}
 {{template "header" "index"}}
       <form id="paste-form" action="/" method="post">
-        <textarea id="paste-box" name="Value" aria-label="paste box" required></textarea>
+        <textarea id="paste-box" name="Value" aria-label="paste box" required maxlength={{.}} autocomplete="off" spellcheck="false" autofocus></textarea>
         <button id="paste-button">submit</button>
       </form>
 {{template "footer"}}{{end}}
