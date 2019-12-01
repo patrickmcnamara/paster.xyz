@@ -77,18 +77,18 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		switch path {
 		// serve homepage
 		case "/":
+			w.Header().Set("Cache-Control", "no-cache")
 			t, _ := template.ParseFiles("template/page.tmpl", "template/index.tmpl")
 			t.ExecuteTemplate(w, "index-page", pasteLength)
 			log.Printf("%s - %s - homepage", method, path)
 
-		// don't serve favicon and don't log
+		// 404 favicon, don't log
 		case "/favicon.ico":
 			http.NotFound(w, r)
 
-		// status page
+		// status page, don't log
 		case "/status":
 			fmt.Fprintln(w, "UP")
-			log.Printf("%s - %s - status check", method, path)
 
 		// serve latest paste
 		case "/latest":
@@ -99,12 +99,12 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				log.Printf("%s - %s - %s", method, path, errS)
 				return
 			}
+			w.Header().Set("Cache-Control", "no-cache")
 			http.Redirect(w, r, "/"+base64.RawURLEncoding.EncodeToString(id), http.StatusSeeOther)
 			log.Printf("%s - %s - redirecting to %s", method, path, "/"+base64.RawURLEncoding.EncodeToString(id))
 
 		// list recent pastes
 		case "/recent":
-			t, _ := template.ParseFiles("template/page.tmpl", "template/recent.tmpl")
 			pastes, err := a.getRecentPastes()
 			if err != nil {
 				errS := "could not list recent pastes"
@@ -117,17 +117,21 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				recent[i][0] = base64.RawURLEncoding.EncodeToString(p.ID)
 				recent[i][1] = p.Time.Format("2006-01-02 15:04:05")
 			}
+			w.Header().Set("Cache-Control", "no-cache")
+			t, _ := template.ParseFiles("template/page.tmpl", "template/recent.tmpl")
 			t.ExecuteTemplate(w, "recent-page", recent)
 			log.Printf("%s - %s - listing recent pastes", method, path)
 
 		// other stuff
 		case "/other", "/contact", "/privacy-policy", "/cookie-policy":
+			w.Header().Set("Cache-Control", "no-cache")
 			t, _ := template.ParseFiles("template/page.tmpl", "template/"+strings.Replace(title, " ", "-", -1)+".tmpl")
 			t.ExecuteTemplate(w, strings.Replace(title, " ", "-", -1)+"-page", title)
 			log.Printf("%s - %s - %s", method, path, title)
 
 		// paster.xyz backup
 		case "/paster-xyz.tar.gz":
+			w.Header().Set("Cache-Control", "no-cache")
 			ps, _ := a.getAllPastes()
 			gzw := gzip.NewWriter(w)
 			defer gzw.Close()
@@ -148,7 +152,12 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		default:
 			id, _ := base64.RawURLEncoding.DecodeString(path[1:])
 			if p, err := a.getPaste(id); err == nil {
+				// headers
 				w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+				w.Header().Set("Cache-Control", "immutable")
+				w.Header().Set("Access-Control-Allow-Origin", "*")
+				w.Header().Set("Access-Control-Allow-Methods", "GET")
+				// write paste
 				fmt.Fprint(w, p.Value)
 				log.Printf("%s - %s - paste found", method, path)
 			} else {
