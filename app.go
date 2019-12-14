@@ -91,7 +91,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintln(w, "UP")
 
 		// serve latest paste
-		case "/latest":
+		case "/latest", "/l":
 			id, err := a.getLatestPasteID()
 			if err != nil {
 				errS := "could not list history"
