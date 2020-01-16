@@ -22,3 +22,7 @@ body {
 #paste-button {
     width: 100%;
 }
+
+#recent-next {
+    float: right;
+}

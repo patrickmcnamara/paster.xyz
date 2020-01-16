@@ -9,6 +9,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -33,8 +34,8 @@ func (a *app) getPaste(id []byte) (p paste, err error) {
 	return
 }
 
-func (a *app) getRecentPastes() (ps []paste, err error) {
-	rows, err := a.DB.Query("SELECT ID, Time FROM paste ORDER BY Time DESC LIMIT ?", pasteListLength)
+func (a *app) getRecentPastes(pageNo int) (ps []paste, maxPageNo int, err error) {
+	rows, err := a.DB.Query("SELECT ID, Time FROM paste ORDER BY Time DESC LIMIT ?, ?", pageNo*pasteListLength, pasteListLength)
 	defer rows.Close()
 	if err != nil {
 		return
@@ -44,6 +45,9 @@ func (a *app) getRecentPastes() (ps []paste, err error) {
 		rows.Scan(&p.ID, &p.Time)
 		ps = append(ps, p)
 	}
+	r := a.DB.QueryRow("SELECT COUNT(*) FROM paste")
+	err = r.Scan(&maxPageNo)
+	maxPageNo = (maxPageNo - 1) / pasteListLength
 	return
 }
 
@@ -105,7 +109,14 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		// list recent pastes
 		case "/recent":
-			pastes, err := a.getRecentPastes()
+			currPageNo, err := strconv.Atoi(r.URL.Query().Get("p"))
+			if err != nil {
+				currPageNo = 0
+			}
+			pastes, maxPageNo, err := a.getRecentPastes(currPageNo)
+			if currPageNo > maxPageNo {
+				currPageNo = maxPageNo
+			}
 			if err != nil {
 				errS := "could not list recent pastes"
 				errorHandler(w, errS, err.Error(), http.StatusInternalServerError)
@@ -117,9 +128,24 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				recent[i][0] = base64.RawURLEncoding.EncodeToString(p.ID)
 				recent[i][1] = p.Time.Format("2006-01-02 15:04:05")
 			}
+			prevPageNo, nextPageNo := -1, -1
+			if currPageNo != 0 {
+				prevPageNo = currPageNo - 1
+			}
+			if currPageNo != maxPageNo {
+				nextPageNo = currPageNo + 1
+			}
 			w.Header().Set("Cache-Control", "no-cache")
 			t, _ := template.ParseFiles("template/page.tmpl", "template/recent.tmpl")
-			t.ExecuteTemplate(w, "recent-page", recent)
+			t.ExecuteTemplate(w, "recent-page", struct {
+				Pastes     [][2]string
+				PrevPageNo int
+				NextPageNo int
+			}{
+				Pastes:     recent,
+				PrevPageNo: prevPageNo,
+				NextPageNo: nextPageNo,
+			})
 			log.Printf("%s - %s - listing recent pastes", method, path)
 
 		// other stuff
