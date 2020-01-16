@@ -34,7 +34,7 @@ func (a *app) getPaste(id []byte) (p paste, err error) {
 	return
 }
 
-func (a *app) getRecentPastes(pageNo int) (ps []paste, maxPageNo int, err error) {
+func (a *app) getRecentPastePage(pageNo int) (ps []paste, maxPageNo int, err error) {
 	rows, err := a.DB.Query("SELECT ID, Time FROM paste ORDER BY Time DESC LIMIT ?, ?", pageNo*pasteListLength, pasteListLength)
 	defer rows.Close()
 	if err != nil {
@@ -109,20 +109,28 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		// list recent pastes
 		case "/recent":
-			currPageNo, err := strconv.Atoi(r.URL.Query().Get("p"))
-			if err != nil {
-				currPageNo = 0
+			// get current and max page number
+			currPageNoQS := r.URL.Query().Get("p")
+			currPageNo, err := strconv.Atoi(currPageNoQS)
+			if currPageNoQS != "" && err != nil {
+				notFoundHandler(w)
+				log.Printf("%s - %s - listing recent pastes, bad page parameter %q", method, path, currPageNoQS)
+				return
 			}
-			pastes, maxPageNo, err := a.getRecentPastes(currPageNo)
-			if currPageNo > maxPageNo {
-				currPageNo = maxPageNo
-			}
+			pastes, maxPageNo, err := a.getRecentPastePage(currPageNo)
 			if err != nil {
 				errS := "could not list recent pastes"
 				errorHandler(w, errS, err.Error(), http.StatusInternalServerError)
 				log.Printf("%s - %s - %s", method, path, errS)
 				return
 			}
+			if currPageNo < 0 || currPageNo > maxPageNo {
+				notFoundHandler(w)
+				log.Printf("%s - %s - listing recent pastes, page %d not found", method, path, currPageNo)
+				return
+			}
+
+			// manage pastes and pages
 			recent := make([][2]string, len(pastes))
 			for i, p := range pastes {
 				recent[i][0] = base64.RawURLEncoding.EncodeToString(p.ID)
@@ -135,6 +143,8 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if currPageNo != maxPageNo {
 				nextPageNo = currPageNo + 1
 			}
+
+			// execute page template
 			w.Header().Set("Cache-Control", "no-cache")
 			t, _ := template.ParseFiles("template/page.tmpl", "template/recent.tmpl")
 			t.ExecuteTemplate(w, "recent-page", struct {
@@ -146,7 +156,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				PrevPageNo: prevPageNo,
 				NextPageNo: nextPageNo,
 			})
-			log.Printf("%s - %s - listing recent pastes", method, path)
+			log.Printf("%s - %s - listing recent pastes, page %d", method, path, currPageNo)
 
 		// other stuff
 		case "/other", "/contact", "/privacy-policy", "/cookie-policy":
@@ -187,7 +197,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				fmt.Fprint(w, p.Value)
 				log.Printf("%s - %s - paste found", method, path)
 			} else {
-				errorHandler(w, "404 not found", "OOPSIE WOOPSIE!! 😳 Uwu 😚 We make a fucky wucky!! 🙅‍ 🤷🏼‍ A wittle fucko boingo! 🌈💫 The code monkeys 🙈🙉at our headquarters 🕍 💤 are working VEWY HAWD 💸💯 to fix this! ♿️", http.StatusNotFound)
+				notFoundHandler(w)
 				log.Printf("%s - %s - page not found", method, path)
 			}
 		}

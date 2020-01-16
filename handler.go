@@ -13,3 +13,7 @@ func errorHandler(w http.ResponseWriter, title, desc string, statusCode int) {
 		"Description": desc,
 	})
 }
+
+func notFoundHandler(w http.ResponseWriter) {
+	errorHandler(w, "404 not found", "OOPSIE WOOPSIE!! 😳 Uwu 😚 We make a fucky wucky!! 🙅‍ 🤷🏼‍ A wittle fucko boingo! 🌈💫 The code monkeys 🙈🙉at our headquarters 🕍 💤 are working VEWY HAWD 💸💯 to fix this! ♿️", http.StatusNotFound)
+}
