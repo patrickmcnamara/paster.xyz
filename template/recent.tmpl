@@ -4,7 +4,7 @@
       {{range .Pastes}}  <li><a href="/{{index . 0}}">{{index . 0}}</a> - {{index . 1}}</li>
       {{end}}</ul>{{if or (ne .PrevPageNo -1) (ne .NextPageNo -1)}}
       <nav>
-      {{if ne .PrevPageNo -1}}  <a id="recent-prev" href="/recent?p={{.PrevPageNo}}">Prev</a>
+      {{if ne .PrevPageNo -1}}  <a id="recent-prev" href="/recent{{if ne .PrevPageNo 0}}?p={{.PrevPageNo}}{{end}}">Prev</a>
       {{end}}{{if ne .NextPageNo -1}}  <a id="recent-next" href="/recent?p={{.NextPageNo}}">Next</a>
       {{end}}{{end}}</nav>{{else}}<p>Nothing found.</p>{{end}}
 {{template "footer"}}{{end}}
