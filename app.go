@@ -81,7 +81,11 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		switch path {
 		// serve homepage
 		case "/":
-			w.Header().Set("Cache-Control", "no-cache")
+			// cache for one day
+			w.Header().Set("Cache-Control", "public")
+			w.Header().Add("Cache-Control", "max-age=86400")
+
+			// homepage
 			t, _ := template.ParseFiles("template/page.tmpl", "template/index.tmpl")
 			t.ExecuteTemplate(w, "index-page", pasteLength)
 			log.Printf("%s - %s - homepage", method, path)
@@ -144,8 +148,10 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				nextPageNo = currPageNo + 1
 			}
 
-			// execute page template
+			// cache off for dynamic content
 			w.Header().Set("Cache-Control", "no-cache")
+
+			// execute page template
 			t, _ := template.ParseFiles("template/page.tmpl", "template/recent.tmpl")
 			t.ExecuteTemplate(w, "recent-page", struct {
 				Pastes     [][2]string
@@ -160,19 +166,30 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		// other stuff
 		case "/other", "/contact", "/privacy-policy", "/cookie-policy":
-			w.Header().Set("Cache-Control", "no-cache")
+			// cache for one day
+			w.Header().Set("Cache-Control", "public")
+			w.Header().Set("Cache-Control", "max-age=86400")
+
+			// execute page template
 			t, _ := template.ParseFiles("template/page.tmpl", "template/"+strings.Replace(title, " ", "-", -1)+".tmpl")
 			t.ExecuteTemplate(w, strings.Replace(title, " ", "-", -1)+"-page", title)
 			log.Printf("%s - %s - %s", method, path, title)
 
 		// paster.xyz backup
 		case "/paster-xyz.tar.gz":
+			// don't cache for dynamic content
 			w.Header().Set("Cache-Control", "no-cache")
+
+			// get every paste
 			ps, _ := a.getAllPastes()
+
+			// setup tar.gz writers
 			gzw := gzip.NewWriter(w)
 			defer gzw.Close()
 			tgz := tar.NewWriter(gzw)
 			defer tgz.Close()
+
+			// write each file with relevant info
 			for _, paste := range ps {
 				tgz.WriteHeader(&tar.Header{
 					Name:    base64.RawURLEncoding.EncodeToString(paste.ID[:]),
@@ -188,11 +205,12 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		default:
 			id, _ := base64.RawURLEncoding.DecodeString(path[1:])
 			if p, err := a.getPaste(id); err == nil {
-				// headers
+				// cache forever, cors forever, plaintext forever 🙏
 				w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 				w.Header().Set("Cache-Control", "immutable")
 				w.Header().Set("Access-Control-Allow-Origin", "*")
 				w.Header().Set("Access-Control-Allow-Methods", "GET")
+
 				// write paste
 				fmt.Fprint(w, p.Value)
 				log.Printf("%s - %s - paste found", method, path)
