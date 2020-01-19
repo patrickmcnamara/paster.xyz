@@ -82,8 +82,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// serve homepage
 		case "/":
 			// cache for one day
-			w.Header().Set("Cache-Control", "public")
-			w.Header().Add("Cache-Control", "max-age=86400")
+			w.Header().Set("Cache-Control", "public, max-age=86400")
 
 			// homepage
 			t, _ := template.ParseFiles("template/page.tmpl", "template/index.tmpl")
@@ -167,8 +166,7 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// other stuff
 		case "/other", "/contact", "/privacy-policy", "/cookie-policy":
 			// cache for one day
-			w.Header().Set("Cache-Control", "public")
-			w.Header().Set("Cache-Control", "max-age=86400")
+			w.Header().Set("Cache-Control", "public, max-age=86400")
 
 			// execute page template
 			t, _ := template.ParseFiles("template/page.tmpl", "template/"+strings.Replace(title, " ", "-", -1)+".tmpl")
