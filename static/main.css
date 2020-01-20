@@ -24,6 +24,7 @@ body {
 }
 
 #paste-button {
+  font-family: monospace;
   width: 100%;
 }
 
