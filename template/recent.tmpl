@@ -1,6 +1,6 @@
 {{define "recent-page"}}{{template "head" "recent"}}
 {{template "header" "recent"}}
-      {{if .Pastes}}<ul>
+      {{if .Pastes}}<ul id="paste-list">
       {{range .Pastes}}  <li><a href="/{{index . 0}}">{{index . 0}}</a> - {{index . 1}}</li>
       {{end}}</ul>{{if or (ne .PrevPageNo -1) (ne .NextPageNo -1)}}
       <nav>
