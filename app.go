@@ -173,10 +173,13 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			t.ExecuteTemplate(w, strings.Replace(title, " ", "-", -1)+"-page", title)
 			log.Printf("%s - %s - %s", method, path, title)
 
-		// paster.xyz backup
-		case "/paster-xyz.tar.gz":
+		// paste archive
+		case "/archive":
 			// don't cache for dynamic content
 			w.Header().Set("Cache-Control", "no-cache")
+
+			// save as a file
+			w.Header().Set("Content-Disposition", "attachment; filename=\"paster-xyz.tar.gz\"")
 
 			// get every paste
 			ps, _ := a.getAllPastes()
