@@ -224,8 +224,8 @@ func (a *app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		// parse values
 		if err := r.ParseForm(); err != nil {
-			errorHandler(w, "could not set paste", err.Error(), http.StatusInternalServerError)
-			log.Printf("%s - %s - could not submit paste - %v", method, path, err)
+			errorHandler(w, "invalid form", err.Error(), http.StatusBadRequest)
+			log.Printf("%s - %s - could not submit paste, invalid form - %v", method, path, err)
 			return
 		}
 
